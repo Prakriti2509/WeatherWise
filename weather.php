@@ -1,7 +1,7 @@
 <?php
 
 $city = $_GET['city'];
-$apiKey = "650f8aeda040423ff15b48cb7f824904";
+$apiKey = "API_KEY";
 
 $cacheFile = "cache/" . strtolower($city) . ".json";
 $cacheTime = 600;
