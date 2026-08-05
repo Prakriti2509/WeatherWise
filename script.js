@@ -1,4 +1,4 @@
-const API_KEY = "650f8aeda040423ff15b48cb7f824904";
+const API_KEY = "API_KEY";
 
 let chart;
 let labelsGlobal = [];
