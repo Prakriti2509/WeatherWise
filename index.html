@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeatherWise</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+
+<div id="sideOverlay" class="side-overlay" onclick="closePanel()"></div>
+
+<div id="sidePanel" class="side-panel">
+  <div class="panel-header">
+    <span id="panelTitle" class="panel-title">Panel</span>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+
+  <div id="panelHourly" class="panel-section" style="display:none;">
+    <div id="hourlyForecastPanel" class="hourly-panel-list"></div>
+  </div>
+
+  <div id="panelRain" class="panel-section" style="display:none;">
+    <div id="precipChancePanel" class="precip-panel-list"></div>
+  </div>
+
+  <div id="panelInsights" class="panel-section" style="display:none;">
+    <div id="guidePanel" class="insights-panel"></div>
+  </div>
+</div>
+
+
+<div class="container">
+
+  <div id="mainContent" class="landing-hero">
+    <div class="hero-icon">🌤</div>
+    <h1 class="site-title">WeatherWise</h1>
+    <p class="site-sub">Know before you go</p>
+    <div class="top centered-search">
+      <input type="text" id="city" placeholder="Search city..." onkeydown="if(event.key==='Enter'){ doSearch(); }">
+      <button onclick="doSearch()">Search</button>
+    </div>
+
+  </div>
+
+  <div id="topSearch" style="display:none;">
+    <div class="top-bar">
+      <div class="top-brand">🌤 WeatherWise</div>
+      <div class="top">
+        <input type="text" id="cityTop" placeholder="Search city..." onkeydown="if(event.key==='Enter'){ syncAndSearch(); }">
+        <button onclick="syncAndSearch()">Search</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="weatherUI" style="display:none;" class="weather-ui-panel">
+
+    <div class="hero-card">
+      <div class="hero-left">
+        <div class="city-country">
+          <h2 id="cityName"></h2>
+          <span id="countryBadge" class="country-badge"></span>
+        </div>
+        <p id="localTime" class="local-time"></p>
+        <p id="desc" class="condition-desc"></p>
+        <div class="temp-row">
+          <div id="temp" class="temp"></div>
+          <div class="temp-meta">
+            <p id="feels">Feels like --°C</p>
+            <p id="hiLo">H: --° / L: --°</p>
+          </div>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div id="weatherEmoji" class="weather-emoji">🌤</div>
+      </div>
+    </div>
+
+    <!-- ─── PANEL TRIGGER BUTTONS ─── -->
+    <div class="panel-triggers">
+      <button class="trigger-btn" onclick="openPanel('hourly')">
+        <span class="trigger-label">Hourly Forecast</span>
+        <span class="trigger-arrow">›</span>
+      </button>
+      <button class="trigger-btn" onclick="openPanel('rain')">
+        <span class="trigger-label">Rain Probability</span>
+        <span class="trigger-arrow">›</span>
+      </button>
+      <button class="trigger-btn" onclick="openPanel('insights')">
+        <span class="trigger-label">Smart Insights</span>
+        <span class="trigger-arrow">›</span>
+      </button>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">💧</div>
+        <div class="stat-label">Humidity</div>
+        <div class="stat-value" id="humidity">--%</div>
+        <div class="stat-bar"><div class="stat-fill" id="humidityBar"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💨</div>
+        <div class="stat-label">Wind Speed</div>
+        <div class="stat-value" id="wind">-- m/s</div>
+        <div class="stat-sub" id="windDir"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">👁</div>
+        <div class="stat-label">Visibility</div>
+        <div class="stat-value" id="visibility">-- km</div>
+        <div class="stat-sub" id="visibilityDesc"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🌡</div>
+        <div class="stat-label">Pressure</div>
+        <div class="stat-value" id="pressure">-- hPa</div>
+        <div class="stat-sub" id="pressureDesc"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">☀️</div>
+        <div class="stat-label">UV Index</div>
+        <div class="stat-value" id="uvIndex">--</div>
+        <div class="stat-sub" id="uvDesc"></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🌿</div>
+        <div class="stat-label">Air Quality</div>
+        <div class="stat-value" id="aqi">--</div>
+        <div class="stat-sub" id="aqiDesc"></div>
+      </div>
+    </div>
+
+    <!-- Sunrise / Sunset -->
+    <div class="sun-card">
+      <div class="sun-item">
+        <span class="sun-icon">🌅</span>
+        <div>
+          <div class="sun-label">Sunrise</div>
+          <div class="sun-time" id="sunrise">--:--</div>
+        </div>
+      </div>
+      <div class="sun-track">
+        <div class="sun-track-bar">
+          <div class="sun-track-fill" id="sunTrackFill"></div>
+          <div class="sun-dot" id="sunDot"></div>
+        </div>
+        <div class="sun-track-label" id="sunLabel">Daylight in progress</div>
+      </div>
+      <div class="sun-item right">
+        <span class="sun-icon">🌇</span>
+        <div>
+          <div class="sun-label">Sunset</div>
+          <div class="sun-time" id="sunset">--:--</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5-Day Forecast -->
+    <div class="section-label">📅 5-Day Forecast</div>
+    <div id="forecast" class="forecast"></div>
+
+    <!-- Chart -->
+    <div class="graph-section">
+      <div class="graph-options">
+        <button onclick="showChart('temp')" id="btnTemp" class="chart-btn active-btn">🌡 Temp</button>
+        <button onclick="showChart('rain')" id="btnRain" class="chart-btn">🌧 Rain</button>
+        <button onclick="showChart('wind')" id="btnWind" class="chart-btn">💨 Wind</button>
+        <button onclick="showChart('humidity')" id="btnHumidity" class="chart-btn">💧 Humidity</button>
+      </div>
+      <canvas id="tempChart"></canvas>
+    </div>
+
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
